@@ -1,6 +1,6 @@
 use std::{
     convert::TryFrom,
-    fmt::{self, Display},
+    fmt::{Display, Formatter, Result as FmtResult},
     str::FromStr,
 };
 
@@ -58,7 +58,7 @@ impl FromStr for ChunkType {
 }
 
 impl Display for ChunkType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(f, "{}", String::from_utf8_lossy(&self.bytes))
     }
 }
@@ -157,7 +157,7 @@ mod tests {
         let chunk_type_1: ChunkType = TryFrom::try_from([82, 117, 83, 116]).unwrap();
         let chunk_type_2 = FromStr::from_str("RuSt").unwrap();
 
-        let _chunk_string = format!("{}", chunk_type_1);
-        let _are_chunks_equal = chunk_type_1 == chunk_type_2;
+        _ = format!("{}", chunk_type_1);
+        _ = chunk_type_1 == chunk_type_2;
     }
 }

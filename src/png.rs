@@ -1,14 +1,14 @@
 use std::{
     convert::TryFrom,
-    fmt::{self, Display},
+    fmt::{Display, Formatter, Result as FmtResult},
     io::{BufRead, BufReader, Read},
 };
 
 use crate::{chunk::Chunk, Error, Result};
 
-#[derive(Debug)]
 pub struct Png {
     header: [u8; 8],
+
     chunks: Vec<Chunk>,
 }
 
@@ -18,6 +18,7 @@ impl Png {
     pub fn from_chunks(chunks: Vec<Chunk>) -> Self {
         Self {
             header: Self::STANDARD_HEADER,
+
             chunks,
         }
     }
@@ -80,7 +81,7 @@ impl TryFrom<&[u8]> for Png {
 }
 
 impl Display for Png {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let chunks: Vec<_> = self.chunks.iter().map(ToString::to_string).collect();
         write!(
             f,
@@ -140,14 +141,14 @@ mod tests {
         #[rustfmt::skip]
         let mut bad_chunk = vec![
             0, 0, 0, 5,         // Length
-            32, 117, 83, 116,   // Chunk Type (bad)
+            32, 117, 83, 116,   // Chunk Type (Bad)
             65, 64, 65, 66, 67, // Data
-            1, 2, 3, 4, 5       // CRC (bad)
+            1, 2, 3, 4, 5       // CRC (Bad)
         ];
 
         chunk_bytes.append(&mut bad_chunk);
-        let png = Png::try_from(chunk_bytes.as_ref());
 
+        let png = Png::try_from(chunk_bytes.as_ref());
         assert!(png.is_err());
     }
 
@@ -445,7 +446,7 @@ mod tests {
     fn test_as_bytes() {
         let png = Png::try_from(&PNG_FILE[..]).unwrap();
         let actual = png.as_bytes();
-        let expected: Vec<_> = PNG_FILE.to_vec();
+        let expected = PNG_FILE.to_vec();
 
         assert_eq!(actual, expected);
     }
@@ -460,7 +461,7 @@ mod tests {
             .collect();
 
         let png: Png = TryFrom::try_from(bytes.as_ref()).unwrap();
-        let _png_string = format!("{}", png);
+        _ = format!("{}", png);
     }
 
     fn testing_png() -> Png {
